@@ -46,6 +46,12 @@ if (!parts[part - 1]) {
 }
 const lines = parts[part - 1].split("\n");
 const title = lines.shift().trim().replace(/:$/, "");
+if (title.length > 60 || /\]\(/.test(title)) {
+  console.error(`part ${part}: the first line is the title and it is shown UNENCRYPTED on the lock screen.\n` +
+    `This one looks like body text:\n  "${title.slice(0, 80)}…"\n` +
+    `Put the title on its own line, then a blank line, then the text.`);
+  process.exit(1);
+}
 const blocks = lines.join("\n").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
 const isChapter = (b) => /^Ch\.?\s*\d+\.?$/i.test(b);
 const hasChapters = blocks.some(isChapter);
