@@ -1,24 +1,32 @@
 #!/usr/bin/env node
-// Build an encrypted, self-contained index.html from a plaintext essay.
+// Build an encrypted, self-contained HTML page from a plaintext source.
 //
-//   node build.mjs path/to/essay.txt "passphrase" [out.html]
+//   node build.mjs <source.txt> "<passphrase>" [out.html] [--part N]
 //
-// The essay is rendered to HTML, encrypted with AES-256-GCM (key derived from
+// The text is rendered to HTML, encrypted with AES-256-GCM (key derived from
 // the passphrase with PBKDF2-SHA256), and embedded in the page as base64.
 // The page contains no plaintext and makes no network requests.
 //
 // Source format (plain text):
-//   line 1            title
-//   "Ch N."           chapter heading
-//   "===" line        end of document (anything after is ignored)
-//   blank-separated   paragraphs; a paragraph's first 4-digit year gets a margin label
+//   "===" lines       separate parts; --part N picks the Nth (default 1)
+//   line 1 of a part  title (a trailing colon is dropped)
+//   "Ch N."           chapter heading; paragraphs inside a chapter get a
+//                     margin label from their first 4-digit year
+//   blank-separated   paragraphs; text before the first chapter (or all of
+//                     it, if there are no chapters) renders as plain prose
+//   [text](url)       becomes a link
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { webcrypto as crypto } from "node:crypto";
 
-const [, , srcPath, passphrase, outPath = "index.html"] = process.argv;
-if (!srcPath || !passphrase) {
-  console.error('usage: node build.mjs <essay.txt> "<passphrase>" [out.html]');
+const args = process.argv.slice(2);
+let part = 1;
+const pi = args.indexOf("--part");
+if (pi !== -1) { part = Number(args[pi + 1]); args.splice(pi, 2); }
+const [srcPath, passphrase, outPath = "index.html"] = args;
+if (!srcPath || !passphrase || !(part >= 1)) {
+  console.error('usage: node build.mjs <source.txt> "<passphrase>" [out.html] [--part N]');
   process.exit(1);
 }
 
@@ -27,22 +35,24 @@ const ITERATIONS = 600_000;
 // ---------- parse + render ----------
 const esc = (s) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const inline = (s) =>
+  esc(s).replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|[./][^\s)]*)\)/g, '<a href="$2">$1</a>');
 
 const raw = readFileSync(srcPath, "utf8").replace(/\r\n/g, "\n");
-const body = raw.split(/^===.*$/m)[0].trim();
-const lines = body.split("\n");
-const title = lines.shift().trim();
-
+const parts = raw.split(/^===.*$/m).map((p) => p.trim()).filter(Boolean);
+if (!parts[part - 1]) {
+  console.error(`source has ${parts.length} part(s); no part ${part}`);
+  process.exit(1);
+}
+const lines = parts[part - 1].split("\n");
+const title = lines.shift().trim().replace(/:$/, "");
 const blocks = lines.join("\n").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+const isChapter = (b) => /^Ch\.?\s*\d+\.?$/i.test(b);
+const hasChapters = blocks.some(isChapter);
 
 let html = "";
 let chapterOpen = false;
 for (const b of blocks) {
-  if (!chapterOpen && !/^Ch\.?\s*\d+/i.test(b)) {
-    // anything before the first chapter is a preface
-    html += `<p class="note">${esc(b)}</p>\n`;
-    continue;
-  }
   const ch = b.match(/^Ch\.?\s*(\d+)\.?$/i);
   if (ch) {
     if (chapterOpen) html += `</section>\n`;
@@ -50,9 +60,14 @@ for (const b of blocks) {
     chapterOpen = true;
     continue;
   }
+  if (!chapterOpen) {
+    // prose: a preface before the chapters, or the whole thing if there are none
+    html += `<p class="${hasChapters ? "note" : "prose"}">${inline(b)}</p>\n`;
+    continue;
+  }
   const year = b.match(/\b(1[89]\d\d|20\d\d)\b/);
   const label = year ? `<span class="when" aria-hidden="true">${year[1]}</span>` : "";
-  html += `<p class="v">${label}${esc(b)}</p>\n`;
+  html += `<p class="v">${label}${inline(b)}</p>\n`;
 }
 if (chapterOpen) html += `</section>\n`;
 
@@ -78,7 +93,8 @@ const payload = JSON.stringify({ v: 1, it: ITERATIONS, salt: b64(salt), iv: b64(
 // ---------- page ----------
 const template = readFileSync(new URL("./template.html", import.meta.url), "utf8");
 const page = template
-  .replace("__TITLE__", esc(title))
+  .replaceAll("__TITLE__", esc(title))
   .replace("__PAYLOAD__", payload.replace(/</g, "\\u003c"));
+mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, page);
-console.log(`wrote ${outPath} (${(page.length / 1024).toFixed(1)} KB, ${blocks.length} blocks)`);
+console.log(`wrote ${outPath} (${(page.length / 1024).toFixed(1)} KB, part ${part}: "${title}", ${blocks.length} blocks)`);

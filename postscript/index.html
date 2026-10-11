@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Postscript</title>
+<style>
+  :root {
+    --bg: #f7f4ee;
+    --ink: #1f1d1a;
+    --muted: #7a736a;
+    --rule: #d9d2c6;
+    --accent: #8b3a2f;
+    --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171a;
+      --ink: #e6e1d8;
+      --muted: #8e887f;
+      --rule: #2f2e33;
+      --accent: #d0806f;
+      --field: #222226;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+    font-size: 1.1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 38rem; margin: 0 auto; padding: 4rem 1rem 6rem; }
+
+  /* lock screen */
+  #lock { text-align: center; padding-top: 18vh; }
+  #lock h1 { font-weight: normal; font-size: 1.6rem; letter-spacing: 0.02em; margin: 0 0 2rem; }
+  #lock form { display: inline-flex; gap: 0.5rem; }
+  #lock input {
+    font: inherit; font-size: 1rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--rule); border-radius: 4px;
+    background: var(--field); color: var(--ink);
+    width: 14rem;
+  }
+  #lock button {
+    font: inherit; font-size: 1rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--rule); border-radius: 4px;
+    background: transparent; color: var(--ink); cursor: pointer;
+  }
+  #lock button:hover { border-color: var(--accent); color: var(--accent); }
+  #msg { color: var(--muted); font-size: 0.9rem; min-height: 1.4em; margin-top: 1rem; }
+  .shake { animation: shake 0.3s; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  /* essay */
+  #essay { display: none; }
+  #essay h1 {
+    font-weight: normal; font-size: 2rem; letter-spacing: 0.01em;
+    margin: 0 0 0.5rem; line-height: 1.2;
+  }
+  .note {
+    color: var(--muted); font-style: italic; font-size: 0.95rem;
+    margin: 0 0 3rem; padding-bottom: 1rem; border-bottom: 1px solid var(--rule);
+  }
+  .prose { margin: 0 0 1.4rem; }
+  #essay h1 + .prose { margin-top: 2.5rem; }
+  #essay a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+  .chapter { margin: 0 0 3rem; }
+  .chapter h2 {
+    font-weight: normal; font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 1.5rem; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .chapter h2::before { content: "Ch."; }
+  .chapter h2::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+  p.v { position: relative; margin: 0 0 1.4rem; }
+  .when {
+    display: block; font-size: 0.75rem; letter-spacing: 0.12em; color: var(--accent);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    margin-bottom: 0.1rem;
+  }
+  @media (min-width: 60rem) {
+    .when {
+      position: absolute; right: 100%; top: 0.35em; margin: 0 1.5rem 0 0; width: 5rem; text-align: right;
+    }
+  }
+  footer { margin-top: 5rem; color: var(--muted); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div id="lock">
+    <h1>Postscript</h1>
+    <form id="f" autocomplete="off">
+      <input id="p" type="password" placeholder="passphrase" aria-label="passphrase" autofocus>
+      <button type="submit">Open</button>
+    </form>
+    <div id="msg"></div>
+  </div>
+  <article id="essay"></article>
+</main>
+<script id="payload" type="application/json">{"v":1,"it":600000,"salt":"PjAfhAuoWm3O8mHMhcq+4w==","iv":"1xWzGrocv8p3dxAd","ct":"aXvi/0OVgS9sn2mp/fTh0UV6A4I4aNhvEqdAvXEK4JJZMhfjRI2eXjm4XrQgDWQMQua452Kaa9TbpOYX1Ls2WDELgklrR8ci6A0iNs0/p/cXkueMVa6Y1WE4nqMoz2tdnKoe9xOJsCqOtKn2Brm6wdahNAiXK0dawDLSOnWOCzpkV4UOsERNtNJGMp1xOpRa2FyIl+sfmGDqJBrVclnON6dSW+32SB2zElSjgn0XGRYmrQf3Dh9P8rgWrOvlJrhO9KXg8nwHetSC+rP33nUmczgoyIT2JgyJjoUz5rIlsqApTfQJ6Lc9lgBBi8DElDpF3Ly91sxbgIoQANkBpv+e9kI0w3+SoeJKDJFjmm2O49rnVh8zbq4tV6e4W1IXJEJ38p8AjGKV2T/BW3wWaxcMxm2JOo9AIhteO2/ftc6WdI4OYfO3sQhXvMRgqiqITnJu7j21XZl8YrA46DP8VQt/pf2AplCA2vgqJUZFzdQ8vX/t4MQybsqkHoPd72Mg7BEhQdt0pKceYEYZEZ8tkr5VLKdVsE6vQTvo4nTLOc09ei8fK0RHIF5LSb2rbUzA0idlcZSrE5QcJtOIbgyLuXil4uwtkB+exRVJ+sB/P6OZ69js5d7qg/2mC9yNQmXbmBD8alT/uW4bsvYhX2nJYfnbWEHX+YE/hXW3W06pCUypZqY5Jc9FpBWAKtCR/iAWthA+0M0DGA2yx0teat9Nx/Xldw4Y6gciSCyDuXX6plkjHUhWoaR0WzVPCwL6SaOAH8/kHCSUY9LScp7sEym2pgvCIsuMzNSb9KKPbz1o6i5dOG6x2ix2DLllr7ugBQ3DZsdSaGBMNt9YiM8Aub6jydcZ6gTk4+W/CINurQrcjBbUphfgnl38lWWtss12ItmNCNDrBpKNp4qUKDEtrmM0ABxcssKPpstyEt/6tAVah83bgJSshpFrjhOanhWnWturZYBS3o8gIst8Ej9g6VelBRvVcTO1A6jBS6XTkxux6nPklNTgwlPy2ER7V+2T5tpE9oqmJGRUYQwNdbjigfgTCjP/Az2Om9XGckaGIAQGMlmqrJfQZ0Ewc9wD/jyzDu2PyBV/VGfUuVT3P4THnjJSA+8e15naUZznR+y/PPiBFAKy8P+PN1oaLsqGQOWU/Jh6+Uyp0Iel3vNSs+Bg3uedyv0edSYkuei6Bdoq/xEay0ghcM+M7/sne3rMrqHNigFmtXWxEvn4y/NSR2egr7i43348KqqpdZwewXG1A6wBRTLS+DYUWde2cnKwKsVgZs++iY0fRBJIzv5Si2ohgj/eeopROC1fcI/3qD4s8nP/c78TeEsJn0MBq/so+9ZcgpF2a+2h9na9vXLjuJhj9PO3FB6pkqQifCUTUJfa3g6RxS2nFuoyACZTgIvHSl2kestmYoUMlDqaR0MtNgGJza7OD2TXjRNGYN0ytjfggl5/AU7XY5uTSq8Un/DiPRq9PYxZJyNaeuX1kvom5EhLw/eFLlMLxVZC5gPwbYw7PF2FBOqHRscJS4exNj6avvyJbXboMtWLMN2w4QR3yoMca1dWSM9269X4fLgzaNC3a6LUWNmI6DQWa+UVyfR9oQYT0Md+42DuIGuy8OPpRambQ042g0RialOAdirZRVicz8l1QdJ6TgcGQypaCRjQCH2dxQtnlzkpIWnWl2ftAj41W0VHMWDfFnLebi2rZiReptAan1vA+hrYjdXXi+rkiOWQhTeVU/VliaWQ6s04G/7Xq11vMCsdH7F+bRe9aSzZyEvZ6qh6jRS92tJlCxb7xAgpYdpYGPx0/eD843sWJsWYFA1leZbqF+zh8fDZ+jVNkOCnQ6GgcjAfXz8GCl434bnb4pDllgAXiXDjn90lhVQheANtKBNRENP7o8lqfZH0bdUzhChStlLAhgeYTHR5DHe0ngAfnkHmtIoYWOuAZC7oBDSH2zxqx71QYXqRWVi+90udVLuAtNSSZrVD7rie4IFSpA+nQcszAdWPCUnX8vhKNln5f4IvzMbAD/VUSkkX8msAu0fr433rHPk6bSFIIJXAvbWM3SK4YTnfmDPDCV3yp5h4bxo/fyRkXYxshVDt7RokV8RibTaF0whevMdFTMzoRd9QwVG33dYO/LX1BWt9BS0l63vhy862SkaIW8i/mOxw1wLTioYw+izxXXMkjT7rSRALCZ3owrJ5xwvjxMmKiZx5+A66lLCI31GSGVBvbuPEMvVQzN0oBJJd6+PeGQO6ROJCcU+0O0LPvNmzssjoC10iMo/wau3pDfVijgAWSpJUyLFxoFRK1+3qD4qnDpMVGQqrzjpKO094kS8zyVyf12mH3Soam9LjGQsm4x/E2ItxQsbatm1UfSEc6KUL/OnqQ1Rp0TJeKGmK2Pi8LH7Vfm8NY/H4nqf8zu3oj21xHNJCE+unjiKCeSweOHVvv9Tz8ye8Jhdj33hBcv1LC9ZRhpu/ijAgca2LIOMMW8m1VgbkE57qhd3krhtpcbfO/Ga2hTm3NAy9pbHa/UaKEsrxHma4gQMoaGkMV1ujI8PDklgdEBTyeyTL5EdoGEB/eQz6BB9TWrVIs4wVBnR+HBGtJIH98lO8ZCj2tlJmMnIoYi2KNtPCk4xo/NylP4SEJSwnRUCQAYpPkroRXvGEkCcfffMHTpNsc9sJlXSsssj8TJeklk60nsEP4RiVW8UvoRKjs8yyqOBqufVGtRkdlze9PqFGl2w90KyFzNx2brYmo76qq9B6dcF4BswrkYZ0bZFMAs1ivpca4/fED9I8/HaZDC5VSWozVYUV8MwP7B+ANcChErrmHL2HzjMVdZqrabEh9EsEFlf6XBu74P79hHkD87OGUXTmXCMfFgwzhksdDphY1Ryl2gIAMUhh62rkDiaLiocl8LHk7X5Pylo/DDXx8axJONwb4jD7zgZXSxdlPL3XfpBGhTQXIEnbpX/w1zWHRweqQFuDTfEfSF8BiQaHgXf9QrgjdKJ2b8r0rAQWETiOx4NlK+nI2McbDjdTN5Ow8zWdpCAMp8CLV4WhlE/v9JY3uO5CTxes5Re1yKyhj2xdiFsHsomOzTUUejWsK3quyY8/EJLzke3IAV7W86b0PsqFeJgjUcY6zJewy3R8Cdi2zbmJL0xD/v5+/+8+dfqx36qbPn0pvRV2Ax72joi/K91rWro9BkB9C8LaVGwFSjJqPsDcF378+yF2GxWMf2yWXvnqyyGo0LkTvhMEEpWI2qR0MYKu21GRxFsTug/Ho3txbjh0UfU2iEOuVgB/XC2nvfK5ZAGVOLzLIwQT/fjQ/7XTIlS4V+RKgvlH+FJCqAoZmxDWqZPfKUcoOmJmrsjxI+GbVwKGARgZCvRy5lAxVEo+WpycVYch1NtUqykaJj1rTei0XSox+Sy/bi/VW0gpcSoZUsb9m639i7Qiuz8/K0cdzC1GoErDMENgpCNxowe3KRnEdbRZOO18YAMHE888vDSDy1AdK73s5yCP+h9pmyeF5PFp0sfe3oy3T3yUeknUd20D4hAj8BWPBgxKoYy1L8GCqbEJny1I8dNR4f2x4N3ZFjv6GJKZvlZ5N0H0lGrE7DjucKUMgRUbNUqNf68fia4aOhVNx51qb+iUlMtykYKndR4DjPDHG/xPddj9la75Y6TZFa5FWj+FFnrT/oR3eQfZJeEQ2WsG6F9EOWRQtRHdjxxyQZm0naVjnIbPIwdnlySEYKX+iL+u309EHoA6GGj1yNUk/AzOPqY9i9clKkhwm5zmWUvUk2CLtfm5JxCyFWCFFRs0IQw53ozS6lNOPkEKa/XQv1OPkiA1V059mFQVMBkIhM2i3g+1DMYaCjndf2yXAReLQoadckRI+JC48YJBgl9XUz3A6+f1NhLFaTyF8JSHi/J8P6qpy99Y2yph1L407cMXwsYRwPvAvJYRNbWUAFCoANKzYbWPVg2qSgaZRtQ8v4zY1hbWRobN1Cf5FaPSdsfeBF547sVqaVN3L8uq15STVxh8MbOZQvIf2lcHXhXFbHl4qPO/iCLEoEnAxCcaKiZwnQvweZHhhZVGDE6Qs5HicesqnmHphpOijLgxm/maZLCxfF3Ryc0oTzJj/k5PiHdCR5Oaa0kGXfC70eg9qKeZCC1/CG1V2ZrcqHuwIy5tdLOIVrkUE17Y1GgRkAMBIiUv2Pjkc2V43V+Bp2P/J/kyBnUTwyMrvASFZKIkPW8uD+6QBHFMa6yf28p4pHcBfReZXVyneGA9WQtUnEwAItfnp1dBytvNLG/1NZeSu+KXbA4TCI5Nug3w1VRXqtkQwfr4qwmi6hIsWNI5A0zFBu5kRpBwpXzjxsSnCZVdwCwzVjSmOwClk4+8U8COJU2uvIfMCArJ34sgTkWfAWCJ7T64bgjGx2qsCPvB76ot/dy7zK+EuctVyR8kD4wz5ubLcXwk22/BOSmAn5XTRAn2yiDv6s2xrpdXgTCrCjXrA9WUF+toZykxqVXrInu7cQkR9l5Fa7Q5UZnlwW5QsS7oOTML1gYbSuY6ickWxP/gbcLr0yB1TfAitPDLVoAv+ZZFOJE+f3cqLTyFooAaMujOfHgYwRQ/zdZ+Dx+QXswlTs/dAJARZM89RmJyfomEfVBoxDFibNa5cNe4Vk8c7Td1GBzCFW9w9EoAVkUfnOnYtXNlEmTDKoiHJSI3XLzKyn1ZNs5Bw/hmQSeLB+UzzfedNPV0Br4KvD7JLZHEU7LjqEE+batT9P0GqC1FjrUySfYo5xfCs1p+XygpmP5a6V1J+wTKtnzSQu+5IvjusFrmbu9d1xqr1gwvuImsyJRBmhGgnCNzVbRjUAdIuSkY1ntlX8D6XPATzPGc/LKc8v/Sj7T0XCDBb+n3NyVSDibSHxeHw4Jsks6loIVAVnM6oe4RoIas57GJerEjK//sUAeNwygs8JTjaD/oFKPvFnj/TmTbls6EYdm41uLuTGh5FHq8xJbO7BcdqwXgpfJghsEcuqgZHY//8hI7SMQvvSRsAqQRgc/79EDA3MH6JqA6AkclI9F7O3iTM1JO+16lSYxvaFrdGaCkj6ECo0eZ/jYrRxCe6abqg1+13me5Ri5CMnJjvj34v/dJYo6b2WhHq8ah870PBit9mSh8vX7+DblNht0TKX5YlMZ9fgZm/O9OHVW6c1GvwfP73hWQgsu9nmaHaYrg1/Fa3cWeGcPOHVJt1jzmlZbNH/pFGjAWq4fxEicSXAzYowmzLKu5bO+KPN+ulqONs1pVxt7U"}</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById("payload").textContent);
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const form = document.getElementById("f");
+  const input = document.getElementById("p");
+  const msg = document.getElementById("msg");
+  const lock = document.getElementById("lock");
+  const essay = document.getElementById("essay");
+
+  async function open(pass) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(data.salt), iterations: data.it, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(data.iv) }, key, b64(data.ct));
+    return new TextDecoder().decode(pt);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pass = input.value.trim().toLowerCase();
+    if (!pass) return;
+    msg.textContent = "…";
+    try {
+      const html = await open(pass);
+      essay.innerHTML = html;
+      lock.style.display = "none";
+      essay.style.display = "block";
+      input.value = "";
+      window.scrollTo(0, 0);
+    } catch {
+      msg.textContent = "That's not it.";
+      form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake");
+      input.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>
