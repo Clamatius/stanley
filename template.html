@@ -42,14 +42,22 @@
   /* lock screen */
   #lock { text-align: center; padding-top: 18vh; }
   #lock h1 { font-weight: normal; font-size: 1.6rem; letter-spacing: 0.02em; margin: 0 0 2rem; }
-  #lock form { display: inline-flex; gap: 0.5rem; }
+  #lock form { display: inline-flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+  .field { position: relative; display: inline-block; }
   #lock input {
     font: inherit; font-size: 1rem;
-    padding: 0.55rem 0.8rem;
+    padding: 0.55rem 2.6rem 0.55rem 0.8rem;
     border: 1px solid var(--rule); border-radius: 4px;
     background: var(--field); color: var(--ink);
     width: 14rem;
   }
+  #eye {
+    position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%);
+    border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    padding: 0.3rem; line-height: 0; border-radius: 4px;
+  }
+  #eye:hover { color: var(--accent); }
+  #eye svg { width: 1.2rem; height: 1.2rem; }
   #lock button {
     font: inherit; font-size: 1rem;
     padding: 0.55rem 1rem;
@@ -100,7 +108,14 @@
   <div id="lock">
     <h1>__TITLE__</h1>
     <form id="f" autocomplete="off">
-      <input id="p" type="password" placeholder="passphrase" aria-label="passphrase" autofocus>
+      <span class="field">
+        <input id="p" type="password" placeholder="passphrase" aria-label="passphrase"
+               autocapitalize="none" autocorrect="off" spellcheck="false" autofocus>
+        <button type="button" id="eye" aria-label="Show passphrase" aria-pressed="false">
+          <svg id="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+        </button>
+      </span>
       <button type="submit">Open</button>
     </form>
     <div id="msg"></div>
@@ -128,10 +143,29 @@
     return new TextDecoder().decode(pt);
   }
 
+  const eye = document.getElementById("eye");
+  eye.addEventListener("click", () => {
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    eye.setAttribute("aria-pressed", String(show));
+    eye.setAttribute("aria-label", show ? "Hide passphrase" : "Show passphrase");
+    document.getElementById("eye-on").style.display = show ? "none" : "";
+    document.getElementById("eye-off").style.display = show ? "" : "none";
+    input.focus();
+  });
+
+  if (!(window.crypto && crypto.subtle)) {
+    msg.textContent = "This page can only be opened over https:// (or from localhost).";
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const pass = input.value.trim().toLowerCase();
     if (!pass) return;
+    if (!(window.crypto && crypto.subtle)) {
+      msg.textContent = "This page can only be opened over https:// (or from localhost).";
+      return;
+    }
     msg.textContent = "…";
     try {
       const html = await open(pass);
