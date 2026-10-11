@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>__TITLE__</title>
+<style>
+  :root {
+    --bg: #f7f4ee;
+    --ink: #1f1d1a;
+    --muted: #7a736a;
+    --rule: #d9d2c6;
+    --accent: #8b3a2f;
+    --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171a;
+      --ink: #e6e1d8;
+      --muted: #8e887f;
+      --rule: #2f2e33;
+      --accent: #d0806f;
+      --field: #222226;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+    font-size: 1.1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 38rem; margin: 0 auto; padding: 4rem 1rem 6rem; }
+
+  /* lock screen */
+  #lock { text-align: center; padding-top: 18vh; }
+  #lock h1 { font-weight: normal; font-size: 1.6rem; letter-spacing: 0.02em; margin: 0 0 2rem; }
+  #lock form { display: inline-flex; gap: 0.5rem; }
+  #lock input {
+    font: inherit; font-size: 1rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--rule); border-radius: 4px;
+    background: var(--field); color: var(--ink);
+    width: 14rem;
+  }
+  #lock button {
+    font: inherit; font-size: 1rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--rule); border-radius: 4px;
+    background: transparent; color: var(--ink); cursor: pointer;
+  }
+  #lock button:hover { border-color: var(--accent); color: var(--accent); }
+  #msg { color: var(--muted); font-size: 0.9rem; min-height: 1.4em; margin-top: 1rem; }
+  .shake { animation: shake 0.3s; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  /* essay */
+  #essay { display: none; }
+  #essay h1 {
+    font-weight: normal; font-size: 2rem; letter-spacing: 0.01em;
+    margin: 0 0 0.5rem; line-height: 1.2;
+  }
+  .note {
+    color: var(--muted); font-style: italic; font-size: 0.95rem;
+    margin: 0 0 3rem; padding-bottom: 1rem; border-bottom: 1px solid var(--rule);
+  }
+  .chapter { margin: 0 0 3rem; }
+  .chapter h2 {
+    font-weight: normal; font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 1.5rem; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .chapter h2::before { content: "Ch."; }
+  .chapter h2::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+  p.v { position: relative; margin: 0 0 1.4rem; }
+  .when {
+    display: block; font-size: 0.75rem; letter-spacing: 0.12em; color: var(--accent);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    margin-bottom: 0.1rem;
+  }
+  @media (min-width: 60rem) {
+    .when {
+      position: absolute; right: 100%; top: 0.35em; margin: 0 1.5rem 0 0; width: 5rem; text-align: right;
+    }
+  }
+  footer { margin-top: 5rem; color: var(--muted); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div id="lock">
+    <h1>__TITLE__</h1>
+    <form id="f" autocomplete="off">
+      <input id="p" type="password" placeholder="passphrase" aria-label="passphrase" autofocus>
+      <button type="submit">Open</button>
+    </form>
+    <div id="msg"></div>
+  </div>
+  <article id="essay"></article>
+</main>
+<script id="payload" type="application/json">__PAYLOAD__</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById("payload").textContent);
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const form = document.getElementById("f");
+  const input = document.getElementById("p");
+  const msg = document.getElementById("msg");
+  const lock = document.getElementById("lock");
+  const essay = document.getElementById("essay");
+
+  async function open(pass) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(data.salt), iterations: data.it, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(data.iv) }, key, b64(data.ct));
+    return new TextDecoder().decode(pt);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pass = input.value.trim().toLowerCase();
+    if (!pass) return;
+    msg.textContent = "…";
+    try {
+      const html = await open(pass);
+      essay.innerHTML = html;
+      lock.style.display = "none";
+      essay.style.display = "block";
+      input.value = "";
+      window.scrollTo(0, 0);
+    } catch {
+      msg.textContent = "That's not it.";
+      form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake");
+      input.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>

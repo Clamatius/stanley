@@ -1,0 +1,4 @@
+# never commit the plaintext
+*.txt
+*.md.src
+source/
